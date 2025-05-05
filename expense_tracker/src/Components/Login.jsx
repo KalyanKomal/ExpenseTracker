@@ -1,7 +1,14 @@
 import { Container, TextField, Typography,Box,Button } from "@mui/material";
-
+import { useNavigate } from "react-router-dom";
 
 function Login(){
+  const navigate=useNavigate();
+const handleSubmit = () => {
+  // Do your form submission logic here (e.g., validation, API call)
+  
+  // Then navigate to login page
+  navigate('/dashboard');
+};
     return(
 <Container maxWidth="sm" sx={{bgcolor:"red"}}>
 <Box
@@ -20,7 +27,7 @@ function Login(){
 <Typography variant="h5" sx={{color:"blue"}}>LOGIN </Typography>
 <TextField id="emailId" label="User Email ID" variant="outlined" fullWidth />
 <TextField id="password" label="Password" variant="outlined" fullWidth />
-<Button variant="contained" color="primary" fullWidth>
+<Button variant="contained" color="primary" fullWidth onClick={handleSubmit}>
           Submit
         </Button>
 </Box>

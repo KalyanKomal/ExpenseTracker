@@ -1,9 +1,36 @@
 import { Container, TextField, Typography,Box,Button,AppBar,Toolbar,IconButton,Drawer, ListItem,List,ListItemText,Divider, Avatar, Stack, Badge,Dialog, DialogTitle, DialogContent, DialogActions,Card,CardContent} from "@mui/material";
 import MenuIcon from '@mui/icons-material/Menu';
 import NotificationsIcon from '@mui/icons-material/Notifications';
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 function Dashboard(){
+  useEffect(() => {
+    const fetchUserDetails = async () => {
+      const token = localStorage.getItem('authToken');
+      const emailId = localStorage.getItem('emailId');
+      try {
+        const response = await axios.get('http://localhost:8080/getUser', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          params: {
+            emailId: emailId,  // Passing emailId as a query parameter
+          },
+        });
+
+        if (response.data.statusCode === 200) {
+          localStorage.setItem('user', JSON.stringify(response.data.data));
+        } else {
+          console.error('Failed to fetch user details');
+        }
+      } catch (error) {
+        console.error('Error fetching user details:', error);
+      }
+    };
+
+    fetchUserDetails();
+  }, []);
   const transactions = [
     { id: 101, amount: 5000, status: 'Success', date: '2025-05-01' },
     { id: 102, amount: 7500, status: 'Pending', date: '2025-05-02' },

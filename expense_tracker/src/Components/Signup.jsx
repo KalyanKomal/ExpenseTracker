@@ -1,14 +1,32 @@
 import { Container, TextField, Typography,Box,Button } from "@mui/material";
 import {useNavigate} from "react-router-dom";
+import axios from 'axios';
+import { useState } from "react";
 
 function Signup(){
 const navigate=useNavigate();
-const handleSubmit = () => {
-  // Do your form submission logic here (e.g., validation, API call)
-  
-  // Then navigate to login page
-  navigate('/login');
+const [formData, setFormData] = useState({
+  user_Email: '',
+  password: '',
+  firstName: '',
+  lastName: '',
+  phoneNumber: ''
+});
+
+const handleChange = (e) => {
+  setFormData({...formData, [e.target.id]: e.target.value});
 };
+const handleSubmit = async (event) => {
+  event.preventDefault();
+  try {
+    await axios.post('http://localhost:8080/signup', formData); // Replace with your backend URL
+    navigate('/login');
+  } catch (error) {
+    console.error('Signup failed:', error);
+    alert('Signup failed. Please try again.');
+  }
+};
+
     return (
         <Container maxWidth="sm" sx={{bgcolor:"red"}}>
 <Box
@@ -27,11 +45,11 @@ const handleSubmit = () => {
         }}
       >
 <Typography variant="h5" sx={{color:"blue"}}>LOGIN </Typography>
-<TextField id="emailId" label="User Email ID" variant="outlined" fullWidth />
-<TextField id="password" label="Password" variant="outlined" fullWidth />
-<TextField id="firstName" label="FirstName" variant="outlined" fullWidth />
-<TextField id="lastName" label="LastName" variant="outlined" fullWidth />
-<TextField id="phonenumber" label="PhoneNumber" variant="outlined" fullWidth />
+<TextField id="user_Email" label="User Email ID" variant="outlined" onChange={handleChange} fullWidth />
+<TextField id="password" label="Password" variant="outlined" onChange={handleChange} fullWidth />
+<TextField id="firstName" label="FirstName" variant="outlined" onChange={handleChange} fullWidth />
+<TextField id="lastName" label="LastName" variant="outlined" onChange={handleChange}  fullWidth />
+<TextField id="phoneNumber" label="PhoneNumber" variant="outlined" onChange={handleChange} fullWidth />
 
 <Button variant="contained" color="primary" fullWidth onClick={handleSubmit}>
           Submit

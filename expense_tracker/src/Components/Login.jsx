@@ -29,6 +29,7 @@ function Login(){
       const token=response.data.data;
       localStorage.setItem('authToken', token);
       localStorage.setItem('emailId',formData.emailId);
+      console.log(localStorage)
       navigate('/dashboard');  // Login successful
     } else {
       alert(response.data.message || 'Login failed.');

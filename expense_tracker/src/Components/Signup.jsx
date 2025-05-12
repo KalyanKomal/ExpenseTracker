@@ -45,11 +45,11 @@ const handleSubmit = async (event) => {
         }}
       >
 <Typography variant="h5" sx={{color:"blue"}}>LOGIN </Typography>
-<TextField id="user_Email" label="User Email ID" variant="outlined" onChange={handleChange} fullWidth />
-<TextField id="password" label="Password" variant="outlined" onChange={handleChange} fullWidth />
-<TextField id="firstName" label="FirstName" variant="outlined" onChange={handleChange} fullWidth />
-<TextField id="lastName" label="LastName" variant="outlined" onChange={handleChange}  fullWidth />
-<TextField id="phoneNumber" label="PhoneNumber" variant="outlined" onChange={handleChange} fullWidth />
+<TextField id="user_Email" label="User Email ID" variant="outlined" onChange={handleChange} fullWidth required/>
+<TextField id="password" label="Password" variant="outlined" onChange={handleChange} fullWidth required/>
+<TextField id="firstName" label="FirstName" variant="outlined" onChange={handleChange} fullWidth required/>
+<TextField id="lastName" label="LastName" variant="outlined" onChange={handleChange}  fullWidth required/>
+<TextField id="phoneNumber" label="PhoneNumber" variant="outlined" onChange={handleChange} fullWidth required/>
 
 <Button variant="contained" color="primary" fullWidth onClick={handleSubmit}>
           Submit

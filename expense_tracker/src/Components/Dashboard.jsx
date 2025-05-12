@@ -4,7 +4,13 @@ import NotificationsIcon from '@mui/icons-material/Notifications';
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import dayjs from "dayjs";
+import Statistics from "./Statistics";
+import { TransactionContext } from '../Context/TransactionContext';
+
 function Dashboard() {
+  const { setTransactionsContext } = useContext(TransactionContext);
+
 const [transactionDialogOpen, setTransactionDialogOpen] = useState(false);
 const [title, setTitle] = useState('');
 const [amount, setAmount] = useState('');
@@ -12,7 +18,7 @@ const [newTransactions, setNewTransactions] = useState([]);
 const [budgetDialogOpen, setBudgetDialogOpen] = useState(false);
 const [budget, setBudget] = useState("");
 const[displayTransactions,setDisplayTransactions]=useState([]);
-// const [user, setUser] = useState(JSON.parse(localStorage.getItem("user")) || {});
+ const [user_Main, setUserMain] = useState(JSON.parse(localStorage.getItem("user")) || {});
 
 
 
@@ -53,12 +59,42 @@ const[displayTransactions,setDisplayTransactions]=useState([]);
       }
     };
 
+    const fetchTransactions=async()=>{
+            const token = localStorage.getItem('authToken');
+   const user = JSON.parse(localStorage.getItem('user'));
+  const userId = user?.user_Id;
+  try {
+        const response = await axios.get('http://localhost:8080/getAllTransactions', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          params: {
+            userId: userId,  
+          },
+        });
+ 
+        if (response.data.statusCode === 200) {
+          // Save user data to localStorage
+          setDisplayTransactions(response.data.data);
+         setTransactionsContext(response.data.data);
+          // Log the user data directly
+          console.log('Transactions details saved:', response.data.data);
+        } else {
+          console.error('Failed to fetch user details');
+        }
+      } catch (error) {
+        console.error('Error fetching user details:', error);
+      }
+    }
+
    
     fetchUserDetails();
-  }, []);
+    fetchTransactions();
+  }, [user_Main]);
   const user = JSON.parse(localStorage.getItem('user'));
   console.log(user);
 
+console.log("Transactions passed to Statistics:", displayTransactions);
 
 
 
@@ -128,6 +164,9 @@ const handleSubmitAllTransactions  = async () => {
     alert('Transactions submitted successfully!');
     setNewTransactions([]);
     setTransactionDialogOpen(false);
+     const updatedUser = response.data.data;
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+      setUserMain(updatedUser); 
     }
     // Refresh logic here if needed
   } catch (err) {
@@ -154,6 +193,7 @@ const handleAddBudget = async () => {
       // Update user data in state and localStorage
       const updatedUser = response.data.data;
       localStorage.setItem("user", JSON.stringify(updatedUser));
+      setUserMain(updatedUser);
      // setUser(updatedUser);
 
       // Reset and close dialog
@@ -259,13 +299,13 @@ const handleAddBudget = async () => {
         </DialogActions>
       </Dialog>
       <Box display="flex" flexWrap="wrap" justifyContent="center" mt={15} p={0} sx={{ bgcolor: "red", width: '100vw' }}>
-        {transactions.map((txn) => (
-          <Card key={txn.id} sx={{ width: 300, m: 2, boxShadow: 3 }}>
+        {displayTransactions.map((txn) => (
+          <Card key={txn.transactionId} sx={{ width: 300, m: 2, boxShadow: 3 }}>
             <CardContent>
-              <Typography variant="h6">Transaction #{txn.id}</Typography>
+             {/* <Typography variant="h6">Transaction #{txn.transactionId}</Typography> */}
               <Typography>Amount: ₹{txn.amount}</Typography>
-              <Typography>Title: {txn.status}</Typography>
-              <Typography>Date: {txn.date}</Typography>
+              <Typography>Title: {txn.title}</Typography>
+              <Typography>Date: {dayjs(txn.date).format('DD-MMMM-YYYY')}</Typography>
             </CardContent>
           </Card>
         ))}

@@ -33,8 +33,8 @@ function Login(){
       navigate('/dashboard');  // Login successful
     } else {
       alert(response.data.message || 'Login failed.');
+      navigate('/signup');
     }
-      navigate('/dashboard');
     } catch (error) {
       console.error('Signup failed:', error);
       alert('Signup failed. Please try again.');
@@ -57,8 +57,8 @@ function Login(){
         }}
       >
 <Typography variant="h5" sx={{color:"blue"}}>LOGIN </Typography>
-<TextField id="emailId" label="User Email ID" variant="outlined" onChange={handleChange} fullWidth />
-<TextField id="password" label="Password" variant="outlined" onChange={handleChange} fullWidth />
+<TextField id="emailId" label="User Email ID" variant="outlined" onChange={handleChange} fullWidth required/>
+<TextField id="password" label="Password" variant="outlined" onChange={handleChange} fullWidth required/>
 <Button variant="contained" color="primary" fullWidth onClick={handleSubmit}>
           Submit
         </Button>

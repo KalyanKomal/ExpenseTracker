@@ -1,17 +1,23 @@
 import { Container, TextField, Typography, Box, Button, AppBar, Toolbar, IconButton, Drawer, ListItem, List, ListItemText, Divider, Avatar, Stack, Badge, Dialog, DialogTitle, DialogContent, DialogActions, Card, CardContent } from "@mui/material";
 import MenuIcon from '@mui/icons-material/Menu';
 import NotificationsIcon from '@mui/icons-material/Notifications';
-import { useState, useEffect } from "react";
+import { useState, useEffect,useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import dayjs from "dayjs";
 import Statistics from "./Statistics";
-import { TransactionContext } from '../Context/TransactionContext';
+import  TransactionContext  from '../Context/TransactionContext';
 
 function Dashboard() {
   const { setTransactionsContext } = useContext(TransactionContext);
 
 const [transactionDialogOpen, setTransactionDialogOpen] = useState(false);
+const [transactionEditDialogOpen,setTransactionEditDialogOpen]=useState(false);
+const [selectedTransactionEdit, setSelectedTransactionEdit] = useState(null);
+
+const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+const [selectedTransactionId, setSelectedTransactionId] = useState(null);
+
 const [title, setTitle] = useState('');
 const [amount, setAmount] = useState('');
 const [newTransactions, setNewTransactions] = useState([]);
@@ -77,6 +83,8 @@ const[displayTransactions,setDisplayTransactions]=useState([]);
           // Save user data to localStorage
           setDisplayTransactions(response.data.data);
          setTransactionsContext(response.data.data);
+         console.log("TransactionContext:", useContext(TransactionContext));
+
           // Log the user data directly
           console.log('Transactions details saved:', response.data.data);
         } else {
@@ -214,6 +222,62 @@ const handleAddBudget = async () => {
     navigate('/login');
   };
 
+  //EDIT TRANSACTION OPENING DIALOG
+  const handleEditClick = (txn) => {
+  setSelectedTransactionEdit({ ...txn }); // Make a copy for editing
+  setTransactionEditDialogOpen(true);
+};
+
+const handleUpdateTransaction = async () => {
+  const token = localStorage.getItem('authToken');
+
+  try {
+    const response = await axios.post(`http://localhost:8080/modifyTransaction`, selectedTransactionEdit, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (response.data.statusCode === 200) {
+      alert("Transaction updated!");
+      setTransactionEditDialogOpen(false);
+      setUserMain({ ...user_Main }); 
+    }
+  } catch (err) {
+    console.error("Update failed", err);
+  }
+};
+
+
+const handleDeleteTransaction = async (transactionId) => {
+  const token = localStorage.getItem('authToken');
+
+  try {
+    const response = await axios.post(
+  'http://localhost:8080/deleteTransaction',
+  null, // No request body
+  {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    params: {
+      id: transactionId,
+    },
+  }
+);
+
+    if (response.data.statusCode === 200) {
+      alert('Transaction deleted successfully!');
+      setUserMain({ ...user_Main }); 
+      
+    } else {
+      alert('Failed to delete transaction.');
+    }
+  } catch (error) {
+    console.error('Error deleting transaction:', error);
+    alert('An error occurred while deleting the transaction.');
+  }
+};
   return (
     <Box sx={{
       width: '100vw', overflowX: 'auto', m: 0, p: 0, minHeight: '100vh', top: 0,
@@ -300,12 +364,22 @@ const handleAddBudget = async () => {
       </Dialog>
       <Box display="flex" flexWrap="wrap" justifyContent="center" mt={15} p={0} sx={{ bgcolor: "red", width: '100vw' }}>
         {displayTransactions.map((txn) => (
-          <Card key={txn.transactionId} sx={{ width: 300, m: 2, boxShadow: 3 }}>
+          <Card key={txn.transactionId} sx={{ width: 300, m: 2, boxShadow: 3, cursor: 'pointer' }} onClick={() => handleEditClick(txn)}>
             <CardContent>
              {/* <Typography variant="h6">Transaction #{txn.transactionId}</Typography> */}
               <Typography>Amount: ₹{txn.amount}</Typography>
               <Typography>Title: {txn.title}</Typography>
               <Typography>Date: {dayjs(txn.date).format('DD-MMMM-YYYY')}</Typography>
+              <Box display="flex" justifyContent="space-between" mt={2}>
+      <Button
+        variant="outlined"
+        color="error"
+        onClick={() => {setSelectedTransactionId(txn.transactionId);
+    setDeleteDialogOpen(true);}}
+      >
+        Delete
+      </Button>
+    </Box>
             </CardContent>
           </Card>
         ))}
@@ -389,6 +463,54 @@ const handleAddBudget = async () => {
     <Button onClick={() => setTransactionDialogOpen(false)}>Cancel</Button>
     <Button onClick={handleSubmitAllTransactions } variant="contained" color="primary">
       Submit All
+    </Button>
+  </DialogActions>
+</Dialog>
+
+<Dialog open={transactionEditDialogOpen} onClose={() => setTransactionEditDialogOpen(false)}>
+  <DialogTitle>Edit Transaction</DialogTitle>
+  <DialogContent>
+    <TextField
+      margin="dense"
+      label="Title"
+      fullWidth
+      value={selectedTransactionEdit?.title || ''}
+      onChange={(e) => setSelectedTransactionEdit({ ...selectedTransactionEdit, title: e.target.value })}
+    />
+    <TextField
+      margin="dense"
+      label="Amount"
+      type="number"
+      fullWidth
+      value={selectedTransactionEdit?.amount || ''}
+      onChange={(e) => setSelectedTransactionEdit({ ...selectedTransactionEdit, amount: parseFloat(e.target.value) })}
+    />
+  </DialogContent>
+  <DialogActions>
+    <Button onClick={() => setTransactionEditDialogOpen(false)}>Cancel</Button>
+    <Button onClick={handleUpdateTransaction} variant="contained">Update</Button>
+  </DialogActions>
+</Dialog>
+
+<Dialog
+  open={deleteDialogOpen}
+  onClose={() => setDeleteDialogOpen(false)}
+>
+  <DialogTitle>Confirm Deletion</DialogTitle>
+  <DialogContent>
+    Are you sure you want to delete this transaction? This action cannot be undone.
+  </DialogContent>
+  <DialogActions>
+    <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
+    <Button
+      onClick={async () => {
+        await handleDeleteTransaction(selectedTransactionId);
+        setDeleteDialogOpen(false);
+      }}
+      color="error"
+      variant="contained"
+    >
+      Delete
     </Button>
   </DialogActions>
 </Dialog>

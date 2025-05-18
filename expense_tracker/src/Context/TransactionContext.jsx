@@ -1,15 +1,17 @@
-import React, { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState } from "react";
 
 const TransactionContext = createContext();
 
-export const useTransactions = () => useContext(TransactionContext);
-
 export const TransactionProvider = ({ children }) => {
-  const [transactions, setTransactions] = useState([]);
+  const [transactionsContext, setTransactionsContext] = useState([]);
 
   return (
-    <TransactionContext.Provider value={{ transactions, setTransactions }}>
+    <TransactionContext.Provider value={{ transactionsContext, setTransactionsContext }}>
       {children}
     </TransactionContext.Provider>
   );
 };
+
+export const useTransactions = () => useContext(TransactionContext);
+
+export default TransactionContext;

@@ -14,8 +14,8 @@ function App() {
   //const [count, setCount] = useState(0)
 
   return (
+              <TransactionProvider>
     <BrowserRouter>
-          <TransactionProvider>
 
       <Routes>
         <Route path="/login" element={<Login />} />
@@ -24,9 +24,8 @@ function App() {
         <Route path="/statistics" element={<Statistics/>}/>
         {/* Add other routes here */}
       </Routes>
-            </TransactionProvider>
-
     </BrowserRouter>
+                </TransactionProvider>
   );
 }
 
